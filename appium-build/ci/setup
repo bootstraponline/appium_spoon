@@ -1,0 +1,16 @@
+#!/bin/bash
+{ set -e; } 2>/dev/null
+{ set -x; } 2>/dev/null
+
+# Loading appium-ci submodule
+export APPIUM_ROOT="$(pwd)"
+git submodule update --remote --init submodules/appium-ci
+pushd submodules/appium-ci
+git pull origin master
+{ set +x; } 2>/dev/null
+popd
+
+# This sets up node etc...
+pushd submodules/appium-ci/jenkins-gulper
+source ./setup
+{ set -x; } 2>/dev/null
