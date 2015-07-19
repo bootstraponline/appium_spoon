@@ -615,6 +615,10 @@ exports.mobilePinchOpen = function (req, res) {
   req.device.pinchOpen(startX, startY, endX, endY, duration, percent, steps, element, getResponseHandler(req, res));
 };
 
+exports.mobileSpoon = function (req, res) {
+  req.device.spoon(getResponseHandler(req, res));
+}
+
 exports.mobileScrollTo = function (req, res) {
   logCustomDeprecationWarning('mobile method', 'scrollTo',
       "scrollTo will be removed in a future version of appium");
@@ -1198,6 +1202,7 @@ var mobileCmdMap = {
 , 'move' : exports.touchMove
 , 'pinchClose': exports.mobilePinchClose
 , 'pinchOpen': exports.mobilePinchOpen
+, 'spoon': exports.mobileSpoon
 };
 
 exports.produceError = function (req, res) {

@@ -12,7 +12,8 @@ var errors = require('../../server/errors.js')
   , async = require('async')
   , mkdirp = require('mkdirp')
   , path = require('path')
-  , AdmZip = require("adm-zip");
+  , AdmZip = require("adm-zip")
+  , prettyExec = require('appium-adb/lib/helpers').prettyExec;
 
 var androidController = {};
 
@@ -632,6 +633,40 @@ androidController.pinchOpen = function (startX, startY, endX, endY, duration, pe
   , steps: steps
   };
   this.proxy(["element:pinch", pinchOpts], cb);
+};
+
+androidController.spoon = function (cb) {
+  /*
+   invoke spoon command
+
+   java -jar spoon.jar --apk apk.apk --test-apk test-apk.apk
+
+   respond with base64 encoded zip of spoon-output folder
+   */
+  var spoonJar = path.join(__dirname, 'spoon.jar');
+  var apkPath = path.join(__dirname, 'apk.apk');
+  var testApkPath = path.join(__dirname, 'test-apk.apk');
+  prettyExec('java', ['-jar', spoonJar,
+      '--apk', apkPath,
+      '--test-apk', testApkPath],
+    {maxBuffer: 524288}, function (err, stdout, stderr) {
+      if (err) return cb(new Error(err));
+
+      var bufferOnSuccess = function (buffer) {
+        logger.debug("Converting in-memory zip file to base64 encoded string");
+        var data = buffer.toString('base64');
+        logger.debug("Returning in-memory zip file as base54 encoded string");
+        cb(null, {status: status.codes.Success.code, value: data});
+      };
+
+      var bufferOnFail = function (err) {
+        cb(new Error(err));
+      };
+
+      var zip = new AdmZip();
+      zip.addLocalFolder('spoon-output');
+      zip.toBuffer(bufferOnSuccess, bufferOnFail);
+    });
 };
 
 androidController.flick = function (startX, startY, endX, endY, touchCount, elId, cb) {
